@@ -3,25 +3,29 @@
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
 
-# Cria a instância do banco de dados, mas ainda não a vincula à aplicação.
+# Cria as instâncias das extensões
 db = SQLAlchemy()
+bcrypt = Bcrypt()
+jwt = JWTManager()
 
 def create_app(config_class=Config):
     """
     Cria e configura a instância da aplicação Flask.
     """
-    # Cria a aplicação Flask.
     app = Flask(__name__)
-    
-    # Carrega as configurações a partir da classe Config.
     app.config.from_object(config_class)
 
-    # Inicializa o banco de dados com a aplicação.
+    # Inicializa as extensões com a aplicação
     db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
 
-    # Importa e registra as rotas (URLs) da nossa aplicação.
-    # A importação é feita aqui para evitar importações circulares.
-    from app import routes, models
-    
+    # Importa e registra as rotas (URLs) da nossa aplicação
+    # A importação é feita aqui para evitar importações circulares
+    with app.app_context():
+        from . import routes
+
     return app
